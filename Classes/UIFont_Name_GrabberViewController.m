@@ -41,7 +41,7 @@
 		[vc addAttachmentData:fontsDictionaryAsData
 					 mimeType:@"plist"
 					 fileName:[NSString stringWithFormat:@"UIFont Names for %@ %@.plist", [UIDevice currentDevice].systemName, [UIDevice currentDevice].systemVersion]];
-		[self presentModalViewController:vc animated:YES];
+		[self presentModalViewController:vc animated:NO];
 	}
 	else {
 		UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Can't send mail"
