@@ -21,26 +21,43 @@
 {
 	// Grab a list of fonts available on the system
 	NSMutableDictionary *fontsByFamilyName = [NSMutableDictionary dictionary];
-	NSArray *familyNames = [UIFont familyNames];
+	NSMutableString *fontsString = [NSMutableString string];
+	
+	NSArray *sortDescriptors = [NSArray arrayWithObject:[[[NSSortDescriptor alloc] initWithKey:@"self" ascending:YES] autorelease]];
+	
+	NSArray *familyNames = [[UIFont familyNames] sortedArrayUsingDescriptors:sortDescriptors];
 	for (NSString *aFamilyName in familyNames) {
-		NSArray *fontNames = [UIFont fontNamesForFamilyName:aFamilyName];
+		NSArray *fontNames = [[UIFont fontNamesForFamilyName:aFamilyName] sortedArrayUsingDescriptors:sortDescriptors];
+
 		[fontsByFamilyName setObject:fontNames forKey:aFamilyName];
+
+		[fontsString appendFormat:@"%@\n", aFamilyName];
+		for (NSString *aFontName in fontNames) {
+			[fontsString appendFormat:@"\t%@\n", aFontName];
+		}
+		[fontsString appendString:@"\n"];
 	}
 
-	// Serialise the data into an XML plist
-	NSData *fontsDictionaryAsData = [NSPropertyListSerialization dataFromPropertyList:fontsByFamilyName
-																			   format:NSPropertyListXMLFormat_v1_0
-																	 errorDescription:nil];
-
+	// Create an XML plist data representation of the dictionary
+	NSData *fontsPlistAsData = [NSPropertyListSerialization dataFromPropertyList:fontsByFamilyName
+																		  format:NSPropertyListXMLFormat_v1_0
+																errorDescription:nil];
+	
+	// Create a UTF8 data representation of the string
+	NSData *fontsTxtAsData = [fontsString dataUsingEncoding:NSUTF8StringEncoding];
+	
 	// Send the data via email
 	if ([MFMailComposeViewController canSendMail]) {
 		MFMailComposeViewController *vc = [[[MFMailComposeViewController alloc] init] autorelease];
 		vc.mailComposeDelegate = self;
 		[vc setSubject:[NSString stringWithFormat:@"UIFont names for %@ %@", [UIDevice currentDevice].systemName, [UIDevice currentDevice].systemVersion]];
 		[vc setMessageBody:@"" isHTML:NO];
-		[vc addAttachmentData:fontsDictionaryAsData
+		[vc addAttachmentData:fontsPlistAsData
 					 mimeType:@"plist"
 					 fileName:[NSString stringWithFormat:@"UIFont Names for %@ %@.plist", [UIDevice currentDevice].systemName, [UIDevice currentDevice].systemVersion]];
+		[vc addAttachmentData:fontsTxtAsData
+					 mimeType:@"text"
+					 fileName:[NSString stringWithFormat:@"UIFont Names for %@ %@.txt", [UIDevice currentDevice].systemName, [UIDevice currentDevice].systemVersion]];
 		[self presentModalViewController:vc animated:NO];
 	}
 	else {
