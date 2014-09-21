@@ -39,9 +39,9 @@
 	}
 
 	// Create an XML plist data representation of the dictionary
-	NSData *fontsPlistAsData = [NSPropertyListSerialization dataFromPropertyList:fontsByFamilyName
-																		  format:NSPropertyListXMLFormat_v1_0
-																errorDescription:nil];
+    NSData *fontsPlistAsData = [NSPropertyListSerialization dataWithPropertyList:fontsByFamilyName
+                                                                          format:NSPropertyListXMLFormat_v1_0 options:0
+                                                                           error:nil];
 	
 	// Create a UTF8 data representation of the string
 	NSData *fontsTxtAsData = [fontsString dataUsingEncoding:NSUTF8StringEncoding];
@@ -58,7 +58,7 @@
 		[vc addAttachmentData:fontsTxtAsData
 					 mimeType:@"text"
 					 fileName:[NSString stringWithFormat:@"UIFont Names for %@ %@.txt", [UIDevice currentDevice].systemName, [UIDevice currentDevice].systemVersion]];
-		[self presentModalViewController:vc animated:NO];
+        [self presentViewController:vc animated:NO completion:nil];
 	}
 	else {
 		UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Can't send mail"
@@ -72,7 +72,7 @@
 
 - (void)mailComposeController:(MFMailComposeViewController *)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error
 {
-	[self dismissModalViewControllerAnimated:YES];
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
